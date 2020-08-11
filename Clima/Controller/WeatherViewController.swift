@@ -24,7 +24,9 @@ class WeatherViewController: UIViewController{
         locationManger.delegate = self
         searchTextField.delegate = self
         weatherManager.delegate = self
-        locationManger.requestWhenInUseAuthorization()
+        locationManger.requestWhenInUseAuthorization() //pop up, plist
+        // does not return anything, it calls locationManager (didUpdateLocations) method once it finds lcoation
+        // this is why we must implement didUpdateLocation and didFailWithError
         locationManger.requestLocation()
     }
     
@@ -43,6 +45,7 @@ extension WeatherViewController : UITextFieldDelegate {
         searchTextField.endEditing(true)
     }
     
+    // trap user in edit mode
     func textFieldShouldEndEditing(_ textField: UITextField) -> Bool {
         if textField.text != "" {
             return true
@@ -51,7 +54,8 @@ extension WeatherViewController : UITextFieldDelegate {
             return false
         }
     }
-        
+    
+    // detects when the text field ends editing, good place to grab what user typed in before we reset the text field
     func textFieldDidEndEditing(_ textField: UITextField) {
         if let city = searchTextField.text {
             weatherManager.fetchWeather(cityName: city)
@@ -67,32 +71,31 @@ extension WeatherViewController:WeatherManagerDelegate {
         print(error)
     }
     
-    
+    // called in WeatherManager after we are done parsing JSON data and get back a WeatherModel
     func didUpdateWeather(_ weatherManager:WeatherManager, weather: WeatherModel) {
         DispatchQueue.main.async {
             self.temperatureLabel.text = weather.tempStr
             self.conditionImageView.image = UIImage(systemName: weather.conditionName)
             self.cityLabel.text = weather.cityName
         }
-        
     }
 }
 
 //MARK: - CLLocationManagerDelegate
+
+// these two methods get called with the requestLocation call automatically
 extension WeatherViewController:CLLocationManagerDelegate {
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         if let location = locations.last {
             let lat = location.coordinate.latitude
             let lon = location.coordinate.longitude
-            weatherManager.fetchWeather(latitude:lat, longitute:lon)
+            weatherManager.fetchWeather(latitude:lat, longitute:lon)  // updates the UI through didUpdateWeather
         }
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         print(error.localizedDescription)
     }
-    
-
 }
 

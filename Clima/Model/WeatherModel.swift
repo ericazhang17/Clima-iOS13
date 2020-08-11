@@ -8,6 +8,7 @@
 
 import Foundation
 
+// create a WeatherModel from the decoded data from JSON
 struct WeatherModel {
     let cityName:String
     let conditionID:Int

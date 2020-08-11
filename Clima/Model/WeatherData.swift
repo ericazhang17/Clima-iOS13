@@ -8,6 +8,7 @@
 
 import Foundation
 
+// Used for reading JSON
 struct WeatherData : Codable {
     let name:String
     let main:Main
